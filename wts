@@ -1,0 +1,278 @@
+#!/usr/bin/env python3
+
+import sys, textwrap, argparse, re
+from random import randint
+
+def highlighter(style='reset'):
+    '''
+    Returns ANSI escape wrappers for printing
+    '''
+    styles = {
+            'red': '\033[31m', 'green': '\033[32m', 
+            'yellow': '\033[93m', 'underline': '\033[4m', 
+            'reset': '\033[m'
+            }
+    return styles[style]
+
+def stack_view(cmp=[], mode='badchars'):
+    '''
+    Prints the stack view
+    cmp: list including compared stack view
+    '''
+    mem_range = range(0x10000000, 0xffffffff, randint(0, 1000000))
+    base = int(hex(mem_range[randint(0, len(mem_range))]), 16)
+    badchars = badchar_generator(init=True)
+    stack = '\n'
+    if not cmp:
+        tips = '''
+    {}[!] - When prompted, please paste the stack dump
+          beginning at the first byte of the payload
+        - Alignment does not matter
+        - Press {}{}Ctrl+D{}{} to terminate input{}'''
+        print(tips.format(highlighter('yellow'), highlighter('underline'), 
+            highlighter('red'), highlighter('reset'),
+            highlighter('yellow'), highlighter('reset')))
+        for i in range(len(badchars)):
+            stack += '{}  {}  {}\n'.format(mem_gen(base, i), badchars[i].upper(), decoder(badchars[i]))
+        print(stack)
+    else:
+        op_subsets      = [cmp[0][i:i + 88] for i in range(0, len(cmp[0]), 88)]
+        decoded_subsets = [cmp[1][i:i + 72] for i in range(0, len(cmp[1]), 72)]
+        for i in range(len(decoded_subsets)):
+            if op_subsets[i].strip():
+                stack_a_hex = '{}  {}'.format(mem_gen(base, i), op_subsets[i].strip())
+                stack_ascii = '  {}\n'.format(decoded_subsets[i])
+                hex_nofmt   = stack_a_hex.replace(highlighter('red'), '').\
+                                        replace(highlighter('reset'), '').\
+                                        replace(highlighter('green'), '')
+                if len(hex_nofmt) < 33:
+                    stack_a_hex += ' ' * (33 - len(hex_nofmt))
+                stack += stack_a_hex + stack_ascii
+        print(stack)
+        if len(cmp[2]):
+            if mode == 'badchars':
+                print('{}[+] Generate a sanitized payload by excluding the following bad characters:\n\n./wts -b \'\\x{}\'\n{}'.\
+                        format(highlighter('green'), '\\x'.join(cmp[2]), highlighter('reset')))
+            else:
+                print('{}[+] Generate a sanitized payload by excluding the following bad characters:\n\nmsfvenom -b \'\\x{}\'\n{}'.\
+                        format(highlighter('green'), '\\x'.join(cmp[2]), highlighter('reset')))
+
+def slicer(text):
+    return text.strip()[10:33].strip().lower()
+
+def mem_gen(base, i):
+    '''
+    increments random memory address (base) by 8 for each call
+    '''
+    return hex(base + (i * 8)).replace('0x', '').upper()
+
+def badchar_generator(init=True, sanitize=[], cmp=False, exclusion=[]):
+    '''
+    init=True:  generates an array of bad characters for display (8 bytes per line)
+    init=False: generates a sanitized badchars variable for PoC modification (used with sanitize=[<badchars>])
+    Example usage: -b '\x0a\x3d'
+    '''
+    byte_array = range(0x00, 0xff + 1, 1)
+    badchars = ''
+    wrapper = textwrap.TextWrapper(width=24)
+    if init:
+        for i in byte_array:
+            badchars += hex(i).replace('0x', '') + ' ' if len(hex(i)) > 3 \
+                    else hex(i).replace('0x', '0') + ' '
+        line = wrapper.wrap(text=badchars)
+        if cmp:
+            res = '{}'.format(badchars).split()
+            if exclusion:
+                res = [i for i in badchars.split() if i not in exclusion]
+            return res
+        else:
+            return line
+    else:
+        for i in byte_array:
+            i = hex(i).replace('0x', '\\x') if len(hex(i)) > 3 \
+                    else hex(i).replace('0x', '\\x0')
+            badchars += i if i.replace('\\x', '') not in sanitize else ''
+        out = 'badchars = ('
+        subsets = [badchars[i:i + 64] for i in range(0, len(badchars), 64)]
+        for subset in subsets:
+            out += '\n\t"{}"'.format(subset)
+        out += '\n)\n'
+        if sanitize:
+            print('{}\n[+] Sanitized bad characters: {}{}'.\
+                    format(highlighter(style='green'), [i for i in sanitize if i], highlighter(style='reset')))
+        print('\n{}'.format(out))
+
+def decoder(data, bad=False):
+    '''
+    decodes bytes to printable ASCII (non-printable characters are replaced with blocks)
+    '''
+    decoded = ''
+    hex_op  = ''
+    excluded = []
+    mangled = []
+    excluded_dict = {}
+    if not bad:
+        for i in data.split():
+            decoded += chr(int(str(i), 16)) if chr(int(str(i), 16)).isprintable() else chr(9608)
+        return decoded
+    else:
+        for i in data:
+            if i[0].lower() == i[1].lower():
+                decoded += highlighter('green') + chr(int(str(i[1]), 16)) + highlighter('reset') \
+                        if chr(int(str(i[1]), 16)).isprintable() else highlighter('green') + chr(9608) + highlighter('reset')
+                hex_op += highlighter('green') + i[0].upper() + highlighter('reset') + ' '
+            else:
+                if i[1] == '  ':
+                    decoded += highlighter('red') + ' ' + highlighter('reset')
+                else:
+                    decoded += highlighter('red') + chr(int(str(i[0]), 16)) + highlighter('reset') \
+                            if chr(int(str(i[0]), 16)).isprintable() else highlighter('red') + chr(9608) + highlighter('reset')
+                hex_op += highlighter('red') + i[0].upper() + highlighter('reset') + ' '
+                if i[1].strip():
+                    mangled.append([data.index(i), i[0]])
+        idx = [int(j) for j in ' '.join(([str(i[0]) for i in mangled])).split()]
+        for i in range(len(idx)):
+            if idx[i:] == list(range(idx[i], idx[-1] + 1)) or idx[i:i+4] == list(range(idx[i], idx[i] + 4)):
+                excluded_dict['last'] = mangled[i][1]
+                break
+            if idx[i:] != list(range(idx[i], idx[-1] + 1)):
+                excluded_dict[i] = mangled[i][1]
+        for k in excluded_dict.keys():
+            excluded.append(excluded_dict[k])
+        return (hex_op, decoded, excluded)
+
+def extractor(data, mode=''):
+    test_str = ''
+    if mode == 'badchars':
+        for i in data:
+            test_str += slicer(i) + ' '
+    if mode == 'payload':
+        re_shell = re.compile('(?<="|\')\\\\x.*(?="|\')')
+        for i in data:
+            if re_shell.search(i) is not None:
+                groups = re_shell.search(i).group().split('\\x')
+                for group in groups[1:]:
+                    test_str += group + ' '
+    return test_str.split()
+
+def main():
+    n_ver = '1.0'
+    version = 'WhatTheStack v{}'.format(n_ver)
+    parser = argparse.ArgumentParser(prog='wts')
+    parser.add_argument('-v', '--version', help='print version number and exit', action='store_true')
+    parser.add_argument('-u', '--update', help='update to the latest version', action='store_true')
+    core = parser.add_argument_group('core functionality')
+    vis = parser.add_argument_group('visual')
+    core.add_argument('-i', help='identify bad characters - use against (badchars)* [0x00:0xff] (*PEN-200 Exercise-specific), or generated (payload) shellcode', metavar='badchars|payload')
+    vis.add_argument('-g', action='store_true', help='generate a variable containing all characters [0x00:0xff]')
+    core.add_argument('-b', type=str, nargs=1, metavar='<badchars>', help='generate a badchar-excluded array (case insensitive): ./%(prog)s -b \'\\x0a\\x3d\'')
+    vis.add_argument('-x', action='store_true', help='show example stack dump')
+    args = parser.parse_args()
+    
+    if args.i == 'badchars':
+        print('''
+{}[*]       Please paste the stack dump
+          beginning at the first byte
+          of the payload.  End with a
+          newline and press {}{}Ctrl+D{}
+'''.format(highlighter('yellow'), highlighter('underline'), 
+    highlighter('red'), highlighter('reset')))
+        
+        test_data = sys.stdin.readlines()
+        test_array = extractor(test_data, mode=args.i)
+        if args.b is not None:
+            badchars = badchar_generator(init=True, cmp=True, exclusion=args.b[0].split('\\x'))
+        else:
+            badchars = badchar_generator(init=True, cmp=True)
+        
+        if len(test_array) > len(badchars):
+            test_array = test_array[:len(badchars)]
+        
+        test_subsets = [test_array[i:i + 8] for i in range(0, len(test_array), 8)]
+        data = []
+        
+        for i in range(len(test_array)):
+            data.append([badchars[i], test_array[i]])
+        
+        stack_view(cmp=decoder(data, bad=True))
+
+    elif args.i == 'payload':
+        print('''
+{}[*]       Please paste your payload
+          below. End with a newline
+          and press {}{}Ctrl+D{}
+'''.format(highlighter('yellow'), highlighter('underline'), 
+    highlighter('red'), highlighter('reset')))
+        
+        shellcode = sys.stdin.readlines()
+        test_array = extractor(shellcode, mode=args.i)
+        
+        print('''
+{}[*]       Please paste the stack dump
+          beginning at the first byte
+          of the payload.  End with a
+          newline and press {}{}Ctrl+D{}
+'''.format(highlighter('yellow'), highlighter('underline'), 
+    highlighter('red'), highlighter('reset')))
+        
+        stack_data = sys.stdin.readlines()
+        badchars = extractor(stack_data, mode='badchars')
+        
+        if len(test_array) > len(badchars):
+            test_array = test_array[:len(badchars)]
+        
+        test_subsets = [test_array[i:i + 8] for i in range(0, len(test_array), 8)]
+        data = []
+        
+        for i in range(len(test_array)):
+            data.append([test_array[i], badchars[i]])
+        
+        stack_view(cmp=decoder(data, bad=True), mode='payload')
+    
+    elif args.x:
+        stack_view()
+    
+    elif args.b:
+        excluded = args.b[0].lower().split('\\x')
+        badchar_generator(init=False, sanitize=excluded)
+        stack_view(badchar_generator(init=False, sanitize=excluded))
+    
+    elif args.g:
+        badchar_generator(init=False)
+    
+    elif args.version:
+        print(version)
+    
+    elif args.update:
+        import os, requests
+        current_version = requests.get('https://raw.githubusercontent.com/X0RW3LL/WhatTheStack/main/current_version').text.strip()
+        if current_version == n_ver:
+            print('\n{}[!] WhatTheStack is up to date{}\n'.\
+                    format(highlighter('green'), highlighter('reset')))
+        else:
+            prompt = input('\n{}[!] WhatTheStack v{} is available. Do you want to continue? [y/N]{} '.\
+                    format(highlighter('yellow'), current_version, highlighter('reset')))
+            if prompt.lower().strip() in ['y', 'yes']:
+                print('\n{}[!] Updating to v{}...{}\n'.\
+                        format(highlighter('green'), current_version, highlighter('reset')))
+                swd = os.path.dirname(os.path.realpath(__file__))
+                cmd = 'cd {} && git pull'.format(swd)
+                print('{}[!] Running the following commands: {}{}\n'.\
+                        format(highlighter('yellow'), cmd, highlighter('reset')))
+                os.system(cmd)
+                print('\n{}[!] WhatTheStack is up to date{}\n'.\
+                        format(highlighter('green'), highlighter('reset')))
+            else:
+                print('\n{}[-] Update aborted. Exiting...{}\n'.\
+                        format(highlighter('red'), highlighter('reset')))
+
+    else:
+        print('{} {}\n'.format(version, '2022 by X0RW3LL'))
+        print(parser.format_help().strip())
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('\n[!] Received SIGINT. Exiting...\n')
+        exit()
