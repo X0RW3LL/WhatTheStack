@@ -156,7 +156,7 @@ def extractor(data, mode=''):
     return test_str.split()
 
 def main():
-    n_ver = '1.0'
+    n_ver = '1.0.1'
     version = 'WhatTheStack v{}'.format(n_ver)
     parser = argparse.ArgumentParser(prog='wts')
     parser.add_argument('-v', '--version', help='print version number and exit', action='store_true')
