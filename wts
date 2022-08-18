@@ -235,7 +235,6 @@ def main():
     elif args.b:
         excluded = args.b[0].lower().split('\\x')
         badchar_generator(init=False, sanitize=excluded)
-        stack_view(badchar_generator(init=False, sanitize=excluded))
     
     elif args.g:
         badchar_generator(init=False)
