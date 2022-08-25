@@ -58,7 +58,12 @@ def stack_view(cmp=[], mode='badchars'):
                         format(highlighter('green'), '\\x'.join(cmp[2]), highlighter('reset')))
 
 def slicer(text):
-    return text.strip()[10:33].strip().lower()
+    # EDB
+    if len(text.strip()) > 43:
+        return text.strip()[10:57].strip().lower()
+    # Immunity Debugger
+    else:
+        return text.strip()[10:33].strip().lower()
 
 def mem_gen(base, i):
     '''
