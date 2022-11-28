@@ -75,7 +75,7 @@ visual:
 - **What about contribution?**
   - Contribution is highly encouraged. Create a PR and we may discuss it
 - **How can I contact you?**
-  - You may reach out via [Twitter](https://twitter.com/X0RW3LL) or Discord: `X0RW3LL#6548`
+  - You may reach out via Discord: `X0RW3LL#6548`
 
 ## Credits
 Special thanks to the entire Offensive-Security team, as well as the amazing community that's helped me through my journey :heart:
