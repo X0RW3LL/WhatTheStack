@@ -58,11 +58,19 @@ visual:
 ```
 ### badchar mode
 [![wts-badchars.png](https://i.postimg.cc/VsBWNsRg/wts-badchars.png)](https://postimg.cc/jC27gbBn)
+<<<<<<< HEAD
 [![wts-badchars-ex.png](https://i.postimg.cc/hjt6bXZc/wts-badchars-ex.png)](https://postimg.cc/8FxZTzV0)
+=======
+[![wts-badchars-ex.png](https://i.postimg.cc/SKrCQ63m/wts-badchars-ex.png)](https://postimg.cc/678yYvBP)
+[![edb-bc.png](https://i.postimg.cc/05n7bx4G/edb-bc.png)](https://postimg.cc/NLyKnhBL)
+[![wts-edb-bc.png](https://i.postimg.cc/02Hm0nPb/wts-edb-bc.png)](https://postimg.cc/1fwf9pgQ)
+>>>>>>> 89b9557 (Update screenshots (edb))
 
 ### payload mode
 [![wts-payload1.png](https://i.postimg.cc/jSB8NMnh/wts-payload1.png)](https://postimg.cc/Sn77b7rX)
 [![wts-payload2.png](https://i.postimg.cc/bYL3Ly2r/wts-payload2.png)](https://postimg.cc/QV9QdrmZ)
+[![edb-payload.png](https://i.postimg.cc/VLNntpyx/edb-payload.png)](https://postimg.cc/K4d1S98f)
+[![wts-edb-payload.png](https://i.postimg.cc/13nFCF3M/wts-edb-payload.png)](https://postimg.cc/VJw55dMb)
 
 ## FAQs
 - **I noticed an `--update` option. How does this work?**
