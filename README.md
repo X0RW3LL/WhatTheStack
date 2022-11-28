@@ -58,7 +58,7 @@ visual:
 ```
 ### badchar mode
 [![wts-badchars.png](https://i.postimg.cc/VsBWNsRg/wts-badchars.png)](https://postimg.cc/jC27gbBn)
-[![wts-badchars-ex.png](https://i.postimg.cc/SKrCQ63m/wts-badchars-ex.png)](https://postimg.cc/678yYvBP)
+[![wts-badchars-ex.png](https://i.postimg.cc/hjt6bXZc/wts-badchars-ex.png)](https://postimg.cc/8FxZTzV0)
 
 ### payload mode
 [![wts-payload1.png](https://i.postimg.cc/jSB8NMnh/wts-payload1.png)](https://postimg.cc/Sn77b7rX)
