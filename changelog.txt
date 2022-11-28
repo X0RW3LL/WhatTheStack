@@ -1,0 +1,6 @@
+1.1.0 08/25/22
+==============
+
+add support for EDB
+add changelog
+bump version number
