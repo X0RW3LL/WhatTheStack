@@ -15,7 +15,7 @@ There are two core operational modes:
 - badchars
 - payload
 
-**badchars:** this mode is PEN-200 exercise-specific, and it compares stack dump against all characters [0x00:0xFF]\
+**badchars:** compares stack dump against all characters [0x00:0xFF]\
 **payload:** compares stack dump against msfvenom shellcode
 
 ## Target Audience
@@ -47,8 +47,8 @@ options:
   -u, --update         update to the latest version
 
 core functionality:
-  -i badchars|payload  identify bad characters - use against (badchars)* [0x00:0xff]
-                       (*PEN-200 Exercise-specific), or generated (payload) shellcode
+  -i badchars|payload  identify bad characters - use against (badchars) [0x00:0xff]
+                       or generated (payload) shellcode
   -b <badchars>        generate a badchar-excluded array (case insensitive): ./wts -b
                        '\x0a\x3d'
 
