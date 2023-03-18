@@ -1,3 +1,10 @@
+1.1.1 03/18/23
+==============
+
+archive project
+exclude null bytes by default
+bump version number
+
 1.1.0 08/25/22
 ==============
 
