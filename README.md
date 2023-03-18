@@ -1,9 +1,9 @@
 # WhatTheStack
-Helper script for identifying bad characters based on Immunity's stack dump\
+Helper script for identifying bad characters based on (Immunity|EDB)'s stack dump\
 **TL;DR [Usage](#usage)**
 
 ## IMPORTANT NOTICE
-Buffer Overflows have been officially out of PEN-200 as of March 15 2023\
+Buffer Overflows have been officially out of OSCP as of March 15 2023\
 For more information, please refer to the ['PEN-200 (PWK): Updated for 2023' blog post](https://www.offsec.com/offsec/pen-200-2023)\
 This repo is now archived and will no longer be maintained beyond this point
 
