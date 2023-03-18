@@ -2,6 +2,12 @@
 Helper script for identifying bad characters based on Immunity's stack dump\
 **TL;DR [Usage](#usage)**
 
+## IMPORTANT NOTICE
+Buffer Overflows have been officially out of PEN-200 as of March 15 2023\
+For more information, please refer to the ['PEN-200 (PWK): Updated for 2023' blog post](https://www.offsec.com/offsec/pen-200-2023)\
+This repo is now archived and will no longer be maintained beyond this point\
+[![7ey7kw.jpg](https://i.postimg.cc/cHTNxC9N/7ey7kw.jpg)](https://postimg.cc/MMcLt6Js)
+
 ## Prologue
 I started my PEN-200 journey not too long ago. I've always loved buffer overflows, but absolutely *hated* dealing with bad character identification.\
 I decided to change that as a way of giving back to the community, and possibly saving other members their time and hassle.
