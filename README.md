@@ -65,17 +65,9 @@ visual:
 ```
 ### badchar mode
 [![wts-badchars.png](https://i.postimg.cc/VsBWNsRg/wts-badchars.png)](https://postimg.cc/jC27gbBn)
-<<<<<<< HEAD
-<<<<<<< HEAD
 [![wts-badchars-ex.png](https://i.postimg.cc/hjt6bXZc/wts-badchars-ex.png)](https://postimg.cc/8FxZTzV0)
-=======
-[![wts-badchars-ex.png](https://i.postimg.cc/SKrCQ63m/wts-badchars-ex.png)](https://postimg.cc/678yYvBP)
-=======
-[![wts-badchars-ex.png](https://i.postimg.cc/hjt6bXZc/wts-badchars-ex.png)](https://postimg.cc/8FxZTzV0)
->>>>>>> d39d264 (Update screenshots)
 [![edb-bc.png](https://i.postimg.cc/05n7bx4G/edb-bc.png)](https://postimg.cc/NLyKnhBL)
 [![wts-edb-bc.png](https://i.postimg.cc/02Hm0nPb/wts-edb-bc.png)](https://postimg.cc/1fwf9pgQ)
->>>>>>> 89b9557 (Update screenshots (edb))
 
 ### payload mode
 [![wts-payload1.png](https://i.postimg.cc/jSB8NMnh/wts-payload1.png)](https://postimg.cc/Sn77b7rX)
