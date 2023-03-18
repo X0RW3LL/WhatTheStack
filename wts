@@ -24,16 +24,19 @@ def stack_view(cmp=[], mode='badchars'):
     badchars = badchar_generator(init=True)
     stack = '\n'
     if not cmp:
-        tips = '''
-    {}[!] - When prompted, please paste the stack dump
-          beginning at the first byte of the payload
-        - Alignment does not matter
-        - Press {}{}Ctrl+D{}{} to terminate input{}'''
-        print(tips.format(highlighter('yellow'), highlighter('underline'), 
-            highlighter('red'), highlighter('reset'),
-            highlighter('yellow'), highlighter('reset')))
         for i in range(len(badchars)):
-            stack += '{}  {}  {}\n'.format(mem_gen(base, i), badchars[i].upper(), decoder(badchars[i]))
+            if i != len(badchars) - 1:
+                stack += '{}  {}  {}\n'.format(
+                                                mem_gen(base, i),
+                                                badchars[i].upper(),
+                                                decoder(badchars[i])
+                                                )
+            else:
+                stack += '{}  {}     {}\n'.format(
+                                                mem_gen(base, i),
+                                                badchars[i].upper(),
+                                                decoder(badchars[i])
+                                                )
         print(stack)
     else:
         op_subsets      = [cmp[0][i:i + 88] for i in range(0, len(cmp[0]), 88)]
@@ -73,11 +76,13 @@ def mem_gen(base, i):
 
 def badchar_generator(init=True, sanitize=[], cmp=False, exclusion=[]):
     '''
-    init=True:  generates an array of bad characters for display (8 bytes per line)
-    init=False: generates a sanitized badchars variable for PoC modification (used with sanitize=[<badchars>])
+    init=True:  generates an array of bad characters 
+                for display (8 bytes per line)
+    init=False: generates a sanitized badchars variable for PoC 
+                modification (used with sanitize=[<badchars>])
     Example usage: -b '\x0a\x3d'
     '''
-    byte_array = range(0x00, 0xff + 1, 1)
+    byte_array = range(0x01, 0xff + 1, 1)
     badchars = ''
     wrapper = textwrap.TextWrapper(width=24)
     if init:
@@ -97,14 +102,18 @@ def badchar_generator(init=True, sanitize=[], cmp=False, exclusion=[]):
             i = hex(i).replace('0x', '\\x') if len(hex(i)) > 3 \
                     else hex(i).replace('0x', '\\x0')
             badchars += i if i.replace('\\x', '') not in sanitize else ''
-        out = 'badchars = ('
+        out = 'buf = ('
         subsets = [badchars[i:i + 64] for i in range(0, len(badchars), 64)]
         for subset in subsets:
             out += '\n\t"{}"'.format(subset)
         out += '\n)\n'
         if sanitize:
             print('{}\n[+] Sanitized bad characters: {}{}'.\
-                    format(highlighter(style='green'), [i for i in sanitize if i], highlighter(style='reset')))
+                    format(
+                            highlighter(style='green'),
+                            [i for i in sanitize if i],
+                            highlighter(style='reset'))
+                            )
         print('\n{}'.format(out))
 
 def decoder(data, bad=False):
@@ -124,20 +133,23 @@ def decoder(data, bad=False):
         for i in data:
             if i[0].lower() == i[1].lower():
                 decoded += highlighter('green') + chr(int(str(i[1]), 16)) + highlighter('reset') \
-                        if chr(int(str(i[1]), 16)).isprintable() else highlighter('green') + chr(9608) + highlighter('reset')
+                        if chr(int(str(i[1]), 16)).isprintable() else \
+                        highlighter('green') + chr(9608) + highlighter('reset')
                 hex_op += highlighter('green') + i[0].upper() + highlighter('reset') + ' '
             else:
                 if i[1] == '  ':
                     decoded += highlighter('red') + ' ' + highlighter('reset')
                 else:
                     decoded += highlighter('red') + chr(int(str(i[0]), 16)) + highlighter('reset') \
-                            if chr(int(str(i[0]), 16)).isprintable() else highlighter('red') + chr(9608) + highlighter('reset')
+                            if chr(int(str(i[0]), 16)).isprintable() else \
+                            highlighter('red') + chr(9608) + highlighter('reset')
                 hex_op += highlighter('red') + i[0].upper() + highlighter('reset') + ' '
                 if i[1].strip():
                     mangled.append([data.index(i), i[0]])
         idx = [int(j) for j in ' '.join(([str(i[0]) for i in mangled])).split()]
         for i in range(len(idx)):
-            if idx[i:] == list(range(idx[i], idx[-1] + 1)) or idx[i:i+4] == list(range(idx[i], idx[i] + 4)):
+            if idx[i:] == list(range(idx[i], idx[-1] + 1)) or \
+                    idx[i:i+4] == list(range(idx[i], idx[i] + 4)):
                 excluded_dict['last'] = mangled[i][1]
                 break
             if idx[i:] != list(range(idx[i], idx[-1] + 1)):
@@ -168,8 +180,8 @@ def main():
     parser.add_argument('-u', '--update', help='update to the latest version', action='store_true')
     core = parser.add_argument_group('core functionality')
     vis = parser.add_argument_group('visual')
-    core.add_argument('-i', help='identify bad characters - use against (badchars)* [0x00:0xff] (*PEN-200 Exercise-specific), or generated (payload) shellcode', metavar='badchars|payload')
-    vis.add_argument('-g', action='store_true', help='generate a variable containing all characters [0x00:0xff]')
+    core.add_argument('-i', help='identify bad characters - use against (badchars)* [0x01:0xff] (*PEN-200 Exercise-specific), or generated (payload) shellcode', metavar='badchars|payload')
+    vis.add_argument('-g', action='store_true', help='generate a variable containing all characters [0x01:0xff]')
     core.add_argument('-b', type=str, nargs=1, metavar='<badchars>', help='generate a badchar-excluded array (case insensitive): ./%(prog)s -b \'\\x0a\\x3d\'')
     vis.add_argument('-x', action='store_true', help='show example stack dump')
     args = parser.parse_args()
