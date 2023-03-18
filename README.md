@@ -1,5 +1,5 @@
 # WhatTheStack
-Helper script for identifying bad characters based on (Immunity|EDB)'s stack dump\
+Helper script for identifying bad characters based on (Immunity|edb)'s stack dump\
 **TL;DR [Usage](#usage)**
 
 ## IMPORTANT NOTICE
